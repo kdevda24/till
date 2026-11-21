@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Till</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Till">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="color-scheme" content="light dark">
+<style>
+  :root {
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --key: #ffffff;
+    --key-active: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --green: #15803d;
+    --green-btn: #16a34a;
+    --green-disabled: #bbf7d0;
+    --red: #dc2626;
+    --grey-btn: #d1d5db;
+    --grey-text: #111827;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111827;
+      --card: #1f2937;
+      --key: #1f2937;
+      --key-active: #374151;
+      --text: #f5f5f5;
+      --muted: #9aa0a6;
+      --green: #4ade80;
+      --green-btn: #16a34a;
+      --green-disabled: #1f3b2a;
+      --red: #f87171;
+      --grey-btn: #374151;
+      --grey-text: #f5f5f5;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111827;
+    --card: #1f2937;
+    --key: #1f2937;
+    --key-active: #374151;
+    --text: #f5f5f5;
+    --muted: #9aa0a6;
+    --green: #4ade80;
+    --green-btn: #16a34a;
+    --green-disabled: #1f3b2a;
+    --red: #f87171;
+    --grey-btn: #374151;
+    --grey-text: #f5f5f5;
+    color-scheme: dark;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--bg);
+    z-index: 10;
+  }
+  #app {
+    height: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  button {
+    font: inherit;
+    border: 0;
+    cursor: pointer;
+    touch-action: manipulation;
+    color: var(--text);
+  }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; }
+  .hint { color: var(--muted); font-size: 15px; margin-top: 4px; min-height: 20px; }
+  .amount {
+    color: var(--green);
+    font-size: 56px;
+    font-weight: 800;
+    text-align: center;
+    margin: 18px 0;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .quick { display: flex; gap: 6px; margin-bottom: 12px; }
+  .quick button {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 10px;
+    background: var(--card);
+    font-weight: 600;
+  }
+  .pad {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: minmax(54px, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+    max-height: 380px;
+  }
+  .key {
+    border-radius: 14px;
+    background: var(--key);
+    font-size: 26px;
+    font-weight: 600;
+  }
+  .key:active { background: var(--key-active); }
+  .footer { display: flex; gap: 10px; }
+  .btn {
+    height: 56px;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .btn.grey { background: var(--grey-btn); color: var(--grey-text); padding: 0 22px; font-size: 17px; font-weight: 600; }
+  .btn.green { flex: 1; background: var(--green-btn); color: #fff; }
+  .btn.green:disabled { background: var(--green-disabled); opacity: 0.6; cursor: default; }
+  .summary { background: var(--card); border-radius: 14px; padding: 14px; }
+  .summary div { display: flex; justify-content: space-between; padding: 4px 0; font-size: 16px; }
+  .summary span:first-child { color: var(--muted); }
+  .summary span:last-child { font-weight: 600; }
+  .center { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .label { color: var(--muted); font-size: 16px; text-align: center; margin-top: 18px; }
+  .big { font-size: 52px; font-weight: 800; text-align: center; margin: 6px 0; font-variant-numeric: tabular-nums; }
+  .green-text { color: var(--green); }
+  .red-text { color: var(--red); }
+  .list-title { font-size: 18px; font-weight: 700; margin: 10px 0 8px; }
+  .list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; }
+  .item {
+    display: flex;
+    align-items: center;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 8px;
+  }
+  .item .count { color: var(--green); font-size: 22px; font-weight: 800; width: 64px; }
+  .item .name { font-size: 20px; font-weight: 600; }
+  .grow { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+  // All money is whole cents (1347 = $13.47) so floating point never bites.
+  var DENOMS = [
+    { one: "$100 bill", many: "$100 bills", value: 10000 },
+    { one: "$50 bill", many: "$50 bills", value: 5000 },
+    { one: "$20 bill", many: "$20 bills", value: 2000 },
+    { one: "$10 bill", many: "$10 bills", value: 1000 },
+    { one: "$5 bill", many: "$5 bills", value: 500 },
+    { one: "$1 bill", many: "$1 bills", value: 100 },
+    { one: "quarter", many: "quarters", value: 25 },
+    { one: "dime", many: "dimes", value: 10 },
+    { one: "nickel", many: "nickels", value: 5 },
+    { one: "penny", many: "pennies", value: 1 }
+  ];
+  var MAX_CENTS = 99999999;
+  var KEYS = ["1","2","3","4","5","6","7","8","9","00","0","DEL"];
+
+  var state = { step: "cost", cost: 0, given: 0 };
+
+  function money(cents) {
+    var dollars = Math.floor(cents / 100);
+    var left = cents % 100;
+    return "$" + dollars.toLocaleString("en-US") + "." + String(left).padStart(2, "0");
+  }
+
+  // Greedy: take as many of the biggest piece as fit, then move down.
+  function makeChange(cents) {
+    var remaining = cents;
+    var out = [];
+    DENOMS.forEach(function (d) {
+      var count = Math.floor(remaining / d.value);
+      if (count > 0) {
+        out.push({ label: count === 1 ? d.one : d.many, count: count, value: d.value });
+        remaining -= count * d.value;
+      }
+    });
+    return out;
+  }
+
+  function amountScreen(title, hint, cents, nextLabel, showBack, quick) {
+    var quickHtml = "";
+    if (quick) {
+      quickHtml = '<div class="quick">' + quick.map(function (a) {
+        return '<button data-action="quick" data-value="' + a + '">$' + (a / 100) + '</button>';
+      }).join("") + "</div>";
+    }
+    var keysHtml = KEYS.map(function (k) {
+      return '<button class="key" data-action="key" data-key="' + k + '" aria-label="' + (k === "DEL" ? "Delete" : k) + '">' + (k === "DEL" ? "\u232B" : k) + "</button>";
+    }).join("");
+    return '<h1>' + title + '</h1>' +
+      '<div class="hint">' + hint + '</div>' +
+      '<div class="amount">' + money(cents) + '</div>' +
+      quickHtml +
+      '<div class="pad">' + keysHtml + '</div>' +
+      '<div class="footer">' +
+        (showBack ? '<button class="btn grey" data-action="back">Back</button>' : "") +
+        '<button class="btn green" data-action="next"' + (cents === 0 ? " disabled" : "") + ">" + nextLabel + "</button>" +
+      "</div>";
+  }
+
+  function resultScreen() {
+    var diff = state.given - state.cost;
+    var summary = '<div class="summary">' +
+      "<div><span>Item cost</span><span>" + money(state.cost) + "</span></div>" +
+      "<div><span>Customer gave</span><span>" + money(state.given) + "</span></div></div>";
+    var middle;
+    if (diff < 0) {
+      middle = '<div class="center"><div class="label">Customer still owes</div><div class="big red-text">' + money(-diff) + "</div></div>";
+    } else if (diff === 0) {
+      middle = '<div class="center"><div class="label">Exact amount</div><div class="big green-text" style="font-size:40px">No change due</div></div>';
+    } else {
+      var pieces = makeChange(diff);
+      var total = pieces.reduce(function (s, p) { return s + p.count; }, 0);
+      middle = '<div class="grow"><div class="label">Change due</div><div class="big green-text">' + money(diff) + "</div>" +
+        '<div class="list-title">Give back (' + total + " pieces)</div>" +
+        '<div class="list">' + pieces.map(function (p) {
+          return '<div class="item"><span class="count">' + p.count + ' x</span><span class="name">' + p.label + "</span></div>";
+        }).join("") + "</div></div>";
+    }
+    return summary + middle +
+      '<div class="footer"><button class="btn grey" data-action="back">Edit</button>' +
+      '<button class="btn green" data-action="reset">New sale</button></div>';
+  }
+
+  function render() {
+    var html;
+    if (state.step === "cost") {
+      html = amountScreen("Item cost", "Type the digits, the decimal is automatic", state.cost, "Next", false, null);
+    } else if (state.step === "given") {
+      html = amountScreen("Amount given", "Item cost: " + money(state.cost), state.given, "Calculate change", true, [500, 1000, 2000, 5000, 10000]);
+    } else {
+      html = resultScreen();
+    }
+    document.getElementById("app").innerHTML = html;
+  }
+
+  function currentKey() { return state.step === "cost" ? "cost" : "given"; }
+
+  function pressKey(k) {
+    var field = currentKey();
+    var cents = state[field];
+    if (k === "DEL") {
+      state[field] = Math.floor(cents / 10);
+    } else {
+      var next = k === "00" ? cents * 100 : cents * 10 + Number(k);
+      if (next <= MAX_CENTS) state[field] = next;
+    }
+    render();
+  }
+
+  // Long press on the delete key clears the whole amount.
+  var holdTimer = null;
+  var didLongPress = false;
+  document.addEventListener("pointerdown", function (e) {
+    var el = e.target.closest('[data-key="DEL"]');
+    if (!el) return;
+    didLongPress = false;
+    holdTimer = setTimeout(function () {
+      didLongPress = true;
+      state[currentKey()] = 0;
+      render();
+    }, 500);
+  });
+  function cancelHold() { clearTimeout(holdTimer); }
+  document.addEventListener("pointerup", cancelHold);
+  document.addEventListener("pointercancel", cancelHold);
+
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-action]");
+    if (!el) return;
+    var action = el.getAttribute("data-action");
+    if (action === "key") {
+      if (el.getAttribute("data-key") === "DEL" && didLongPress) { didLongPress = false; return; }
+      pressKey(el.getAttribute("data-key"));
+    } else if (action === "quick") {
+      state.given = Number(el.getAttribute("data-value"));
+      render();
+    } else if (action === "next") {
+      if (state.step === "cost" && state.cost > 0) state.step = "given";
+      else if (state.step === "given" && state.given > 0) state.step = "result";
+      render();
+    } else if (action === "back") {
+      state.step = state.step === "result" ? "given" : "cost";
+      render();
+    } else if (action === "reset") {
+      state = { step: "cost", cost: 0, given: 0 };
+      render();
+    }
+  });
+
+  // Block the iOS double-tap zoom and long-press text selection menu.
+  document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+  render();
+</script>
+</body>
+</html>
